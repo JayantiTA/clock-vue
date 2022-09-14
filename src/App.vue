@@ -1,17 +1,19 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <DigitalClock />
+  <AlarmClock />
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import AlarmClock from "./components/AlarmClock.vue";
+import DigitalClock from "./components/DigitalClock.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    HelloWorld
-  }
-}
+    DigitalClock,
+    AlarmClock,
+  },
+};
 </script>
 
 <style>
