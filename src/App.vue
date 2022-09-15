@@ -17,12 +17,15 @@ export default {
 </script>
 
 <style>
+@import url("https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Poppins:wght@400;500;600;700&display=swap");
+
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-family: "Poppins", sans-serif;
+  background-color: #304d63;
   text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+}
+body {
+  height: 100vh;
+  background-color: #304d63 !important;
 }
 </style>
