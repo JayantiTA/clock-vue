@@ -4,8 +4,8 @@ export default {
   data() {
     return {
       tempAlarm: null,
-      selectedAlarm: null,
-      selectedIndex: 0,
+      tempUpdateAlarm: null,
+      selectedIndex: -1,
       alarms: [],
     };
   },
@@ -19,15 +19,17 @@ export default {
       this.alarms.push(this.tempAlarm);
       localStorage.setItem("alarms", JSON.stringify(this.alarms));
     },
-    addAlarm() {
-      this.$refs.modalForm.show();
-    },
-    editAlarm(alarm, index) {
-      this.selectedAlarm = alarm;
+    editAlarm(index) {
       this.selectedIndex = index;
+      this.tempUpdateAlarm = this.alarms[index];
     },
-    hideModal() {
-      this.$refs.modalForm.hide();
+    updateAlarm() {
+      this.alarms.splice(this.selectedIndex, 1, this.tempUpdateAlarm);
+      localStorage.setItem("alarms", JSON.stringify(this.alarms));
+      this.selectedIndex = -1;
+    },
+    cancelUpdate() {
+      this.selectedIndex = -1;
     },
     removeAlarm(index) {
       this.alarms.splice(index, 1);
@@ -45,13 +47,23 @@ export default {
   </form>
   <li v-for="(alarm, index) in alarms" :key="index">
     <div class="alarm-card">
-      <p>{{ alarm }}</p>
-      <button class="edit-button" @click="editAlarm(alarm, index)">
-        edit alarm
-      </button>
-      <button class="remove-button" @click="removeAlarm(index)">
-        remove alarm
-      </button>
+      <input
+        type="time"
+        v-model="tempUpdateAlarm"
+        required
+        v-if="index === this.selectedIndex"
+      />
+      <p v-else>{{ alarm }}</p>
+      <div v-if="index === this.selectedIndex">
+        <button class="add-button" @click="updateAlarm">update</button>
+        <button class="add-button" @click="cancelUpdate">cancel</button>
+      </div>
+      <div v-else>
+        <button class="edit-button" @click="editAlarm(index)">edit</button>
+        <button class="remove-button" @click="removeAlarm(index)">
+          remove
+        </button>
+      </div>
     </div>
   </li>
 </template>
@@ -80,13 +92,13 @@ input[type="time"]::-webkit-datetime-edit-fields-wrapper {
 }
 
 /* The space between the fields - between hour and minute, the minute and 
-second, second and am/pm */
+    second, second and am/pm */
 input[type="time"]::-webkit-datetime-edit-text {
   padding: 6px 4px;
 }
 
 /* The naming convention for the hour, minute, second, and am/pm field is
-`-webkit-datetime-edit-{field}-field` */
+    `-webkit-datetime-edit-{field}-field` */
 
 /* Hour */
 input[type="time"]::-webkit-datetime-edit-hour-field {
