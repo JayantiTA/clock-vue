@@ -36,6 +36,11 @@ export default {
       : [];
     setInterval(() => this.setTime(), 1000);
   },
+  updated() {
+    this.alarms = localStorage.getItem("alarms")
+      ? JSON.parse(localStorage.getItem("alarms"))
+      : [];
+  },
   methods: {
     setTime() {
       const date = new Date();
