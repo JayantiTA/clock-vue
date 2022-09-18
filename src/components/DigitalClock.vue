@@ -1,5 +1,4 @@
 <script>
-import Toastify from "toastify-js";
 export default {
   name: "DigitalClock",
   data() {
@@ -26,7 +25,6 @@ export default {
         "November",
         "December",
       ],
-      showedToast: false,
     };
   },
   beforeMount() {
@@ -53,25 +51,15 @@ export default {
       this.days = days <= 9 ? `${days}`.padStart(2, 0) : days;
       this.months = this.monthNames[months];
       this.years = years;
-      if (
-        this.alarms.includes(
-          this.hours.toString() + ":" + this.minutes.toString()
-        )
-      ) {
-        Toastify({
-          text: "Wake up!",
-          duration: 3000,
-          newWindow: true,
-          close: true,
-          gravity: "top", // `top` or `bottom`
-          position: "left", // `left`, `center` or `right`
-          stopOnFocus: true, // Prevents dismissing of toast on hover
-          style: {
-            background: "linear-gradient(to right, #00b09b, #96c93d)",
-          },
-          onClick: function () {}, // Callback after click
-        }).showToast();
-        this.audio.play();
+      for (let i = 0; i < this.alarms.length; ++i) {
+        if (
+          this.alarms[i].status === "active" &&
+          this.alarms[i].time === `${this.hours}:${this.minutes}`
+        ) {
+          this.audio.play();
+        } else {
+          this.audio.pause();
+        }
       }
     },
   },
