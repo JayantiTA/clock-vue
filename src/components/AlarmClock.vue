@@ -39,7 +39,6 @@ export default {
       this.alarms[index].status =
         this.alarms[index].status === "active" ? "inactive" : "active";
       localStorage.setItem("alarms", JSON.stringify(this.alarms));
-      console.log(this.alarms[index]);
     },
   },
 };
