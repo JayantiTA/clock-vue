@@ -78,8 +78,8 @@ export default {
         </li>
         <li>
           <div v-if="index === this.selectedIndex">
-            <button class="add-button" @click="updateAlarm">update</button>
-            <button class="add-button" @click="cancelUpdate">cancel</button>
+            <button class="edit-button" @click="updateAlarm">update</button>
+            <button class="cancel-button" @click="cancelUpdate">cancel</button>
           </div>
           <div v-else>
             <button class="edit-button" @click="editAlarm(index)">edit</button>
@@ -135,11 +135,11 @@ export default {
 }
 
 input:checked + .slider {
-  background-color: #2196f3;
+  background-color: #7155d3;
 }
 
 input:focus + .slider {
-  box-shadow: 0 0 1px #2196f3;
+  box-shadow: 0 0 1px #7155d3;
 }
 
 input:checked + .slider:before {
@@ -228,25 +228,36 @@ button {
   font-size: 20px;
   max-height: 50px;
 }
+
 .add-button {
   background-color: #8fb9aa;
   border: 2px solid #f9f9f9;
 }
+
 .edit-button {
   background-color: #f2d096;
   border: 2px solid #f9f9f9;
 }
+
 .remove-button {
   background-color: #ed8975;
   border: 2px solid #f9f9f9;
 }
+
+.cancel-button {
+  background-color: #ccc;
+  border: 2px solid #f9f9f9;
+}
+
 li {
   list-style-type: none;
 }
+
 p {
   margin: auto;
   padding: auto;
 }
+
 .alarm-card {
   position: relative;
   align-items: center;
