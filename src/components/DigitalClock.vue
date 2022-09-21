@@ -1,4 +1,6 @@
 <script>
+import Toastify from "toastify-js";
+import "toastify-js/src/toastify.css";
 export default {
   name: "DigitalClock",
   data() {
@@ -11,6 +13,7 @@ export default {
       seconds: 0,
       alarms: [],
       audio: new Audio(process.env.BASE_URL + "alarm.wav"),
+      lastAlarm: null,
       monthNames: [
         "January",
         "February",
@@ -31,18 +34,25 @@ export default {
     this.setTime();
   },
   mounted() {
+    this.lastAlarm = localStorage.getItem("lastAlarm")
+      ? JSON.parse(localStorage.getItem("lastAlarm"))
+      : null;
     this.alarms = localStorage.getItem("alarms")
       ? JSON.parse(localStorage.getItem("alarms"))
       : [];
     setInterval(() => this.setTime(), 1000);
   },
   updated() {
+    this.lastAlarm = localStorage.getItem("lastAlarm")
+      ? JSON.parse(localStorage.getItem("lastAlarm"))
+      : null;
     this.alarms = localStorage.getItem("alarms")
       ? JSON.parse(localStorage.getItem("alarms"))
       : [];
   },
   methods: {
     setTime() {
+      console.log(this.stopAudio);
       const date = new Date();
       let hours = date.getHours();
       let minutes = date.getMinutes();
@@ -61,11 +71,34 @@ export default {
           this.alarms[i].status === "active" &&
           this.alarms[i].time === `${this.hours}:${this.minutes}`
         ) {
+          if (this.lastAlarm !== this.alarms[i].time) {
+            this.showToast();
+            this.lastAlarm = this.alarms[i].time;
+            localStorage.setItem("lastAlarm", JSON.stringify(this.lastAlarm));
+          }
           this.audio.play();
+          return;
         } else {
           this.audio.pause();
+          this.audio.currentTime = 0;
         }
       }
+    },
+    showToast() {
+      Toastify({
+        text: `It is ${this.hours}:${this.minutes}`,
+        duration: 30000,
+        newWindow: false,
+        close: true,
+        gravity: "top",
+        position: "right",
+        stopOnFocus: true,
+        style: {
+          background: "linear-gradient(to right, #00b09b, #96c93d)",
+          fontFamily: "Poppins",
+        },
+        onClick: function () {}, // Callback after click
+      }).showToast();
     },
   },
 };
