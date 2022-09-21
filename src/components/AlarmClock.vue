@@ -21,7 +21,7 @@ export default {
     },
     editAlarm(index) {
       this.selectedIndex = index;
-      this.tempUpdateAlarm = this.alarms[index];
+      this.tempUpdateAlarm = this.alarms[index].time;
     },
     updateAlarm() {
       this.alarms[this.selectedIndex].time = this.tempUpdateAlarm;
