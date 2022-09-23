@@ -52,7 +52,6 @@ export default {
   },
   methods: {
     setTime() {
-      console.log(this.stopAudio);
       const date = new Date();
       let hours = date.getHours();
       let minutes = date.getMinutes();
