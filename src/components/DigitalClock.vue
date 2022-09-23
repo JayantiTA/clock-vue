@@ -7,13 +7,23 @@ export default {
     return {
       years: 0,
       months: "",
-      days: 0,
+      day: null,
+      dates: 0,
       hours: 0,
       minutes: 0,
       seconds: 0,
       alarms: [],
       audio: new Audio(process.env.BASE_URL + "alarm.wav"),
       lastAlarm: null,
+      dayNames: [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ],
       monthNames: [
         "January",
         "February",
@@ -56,15 +66,17 @@ export default {
       let hours = date.getHours();
       let minutes = date.getMinutes();
       let seconds = date.getSeconds();
-      let days = date.getDate();
+      let dates = date.getDate();
       let months = date.getMonth();
       let years = date.getFullYear();
+      let day = date.getDay();
       this.hours = hours <= 9 ? `${hours}`.padStart(2, 0) : hours;
       this.minutes = minutes <= 9 ? `${minutes}`.padStart(2, 0) : minutes;
       this.seconds = seconds <= 9 ? `${seconds}`.padStart(2, 0) : seconds;
-      this.days = days <= 9 ? `${days}`.padStart(2, 0) : days;
+      this.dates = dates;
       this.months = this.monthNames[months];
       this.years = years;
+      this.day = this.dayNames[day];
       for (let i = 0; i < this.alarms.length; ++i) {
         if (
           this.alarms[i].status === "active" &&
@@ -106,10 +118,11 @@ export default {
 <template>
   <div class="container">
     <h2 class="title">Digital Clock</h2>
+    <h1 class="date">{{ day }}</h1>
     <div class="time-card">
       <h1 class="time">{{ hours }} : {{ minutes }} : {{ seconds }}</h1>
     </div>
-    <h2 class="date">{{ months }} {{ days }}, {{ years }}</h2>
+    <h2 class="date">{{ months }} {{ dates }}, {{ years }}</h2>
   </div>
 </template>
 
