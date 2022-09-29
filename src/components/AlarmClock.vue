@@ -1,4 +1,6 @@
 <script>
+import Toastify from "toastify-js";
+import "toastify-js/src/toastify.css";
 export default {
   name: "AlarmClock",
   data() {
@@ -10,13 +12,27 @@ export default {
     };
   },
   mounted() {
-    this.alarms = localStorage.getItem("alarms")
-      ? JSON.parse(localStorage.getItem("alarms"))
-      : [];
+    setInterval(() => this.getAlarm(), 1000);
   },
   methods: {
+    getAlarm() {
+      this.alarms = localStorage.getItem("alarms")
+        ? JSON.parse(localStorage.getItem("alarms"))
+        : [];
+    },
     setAlarm() {
-      this.alarms.push({ time: this.tempAlarm, status: "active" });
+      for (let alarm in this.alarms) {
+        if (this.alarms[alarm].time === this.tempAlarm) {
+          this.showToast();
+          console.log("Alarm already exists");
+          return;
+        }
+      }
+      this.alarms.push({
+        time: this.tempAlarm,
+        status: "active",
+        isRinging: false,
+      });
       localStorage.setItem("alarms", JSON.stringify(this.alarms));
     },
     editAlarm(index) {
@@ -24,7 +40,15 @@ export default {
       this.tempUpdateAlarm = this.alarms[index].time;
     },
     updateAlarm() {
+      for (let alarm in this.alarms) {
+        if (this.alarms[alarm].time === this.tempUpdateAlarm) {
+          this.showToast();
+          console.log("Alarm already exists");
+          return;
+        }
+      }
       this.alarms[this.selectedIndex].time = this.tempUpdateAlarm;
+      console.log(this.alarms[this.selectedIndex].isRinging);
       localStorage.setItem("alarms", JSON.stringify(this.alarms));
       this.selectedIndex = -1;
     },
@@ -40,16 +64,33 @@ export default {
         this.alarms[index].status === "active" ? "inactive" : "active";
       localStorage.setItem("alarms", JSON.stringify(this.alarms));
     },
+    stopRinging(index) {
+      this.alarms[index].isRinging = false;
+      localStorage.setItem("alarms", JSON.stringify(this.alarms));
+    },
+    showToast() {
+      Toastify({
+        text: `Alarm is already exists`,
+        duration: 6000,
+        close: true,
+        gravity: "top",
+        position: "center",
+        stopOnFocus: true,
+        style: {
+          background: "linear-gradient(to right, #00b09b, #96c93d)",
+          fontFamily: "Poppins",
+        },
+        onClick: function () {}, // Callback after click
+      }).showToast();
+    },
   },
 };
 </script>
 
 <template>
   <h2>Alarm</h2>
-  <form @submit="setAlarm">
-    <input type="time" v-model="tempAlarm" required />
-    <button class="add-button" type="submit">add alarm</button>
-  </form>
+  <input type="time" v-model="tempAlarm" required />
+  <button class="add-button" @click="setAlarm">add alarm</button>
   <li v-for="(alarm, index) in alarms" :key="index">
     <div class="alarm-card">
       <ul>
@@ -77,15 +118,26 @@ export default {
           <p v-else>{{ alarm.time }}</p>
         </li>
         <li>
-          <div v-if="index === this.selectedIndex">
-            <button class="edit-button" @click="updateAlarm">update</button>
-            <button class="cancel-button" @click="cancelUpdate">cancel</button>
+          <div v-if="alarm.isRinging === true">
+            <button class="edit-button" @click="stopRinging(index)">
+              aaaaaaa
+            </button>
           </div>
           <div v-else>
-            <button class="edit-button" @click="editAlarm(index)">edit</button>
-            <button class="remove-button" @click="removeAlarm(index)">
-              remove
-            </button>
+            <div v-if="index === this.selectedIndex">
+              <button class="edit-button" @click="updateAlarm">update</button>
+              <button class="cancel-button" @click="cancelUpdate">
+                cancel
+              </button>
+            </div>
+            <div v-else>
+              <button class="edit-button" @click="editAlarm(index)">
+                edit
+              </button>
+              <button class="remove-button" @click="removeAlarm(index)">
+                remove
+              </button>
+            </div>
           </div>
         </li>
       </ul>
