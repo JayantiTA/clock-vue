@@ -88,25 +88,29 @@ export default {
 </script>
 
 <template>
-  <h2>Alarm</h2>
-  <input type="time" v-model="tempAlarm" required />
-  <button class="add-button" @click="setAlarm">add alarm</button>
+  <div class="alarm-container">
+    <h2>Alarm</h2>
+    <div class="alarm-form">
+      <input class="input-alarm" type="time" v-model="tempAlarm" required />
+      <v-btn class="mx-2" fab dark color="indigo" @click="setAlarm">
+        <v-icon dark> mdi-plus </v-icon>
+      </v-btn>
+    </div>
+  </div>
   <li v-for="(alarm, index) in alarms" :key="index">
     <div class="alarm-card">
       <ul>
         <li>
-          <label class="switch">
-            <input
-              type="checkbox"
-              :checked="alarm.status === 'active'"
-              @change="
-                (event) => {
-                  changeStatus(index, event.target.checked);
-                }
-              "
-            />
-            <span class="slider round"></span>
-          </label>
+          <v-switch
+            v-model="status"
+            inset
+            input-value="alarm.status === 'active'"
+            @change="
+              (event) => {
+                changeStatus(index);
+              }
+            "
+          ></v-switch>
         </li>
         <li>
           <input
@@ -119,24 +123,46 @@ export default {
         </li>
         <li>
           <div v-if="alarm.isRinging === true">
-            <button class="edit-button" @click="stopRinging(index)">
-              aaaaaaa
-            </button>
+            <v-btn
+              class="mx-2"
+              fab
+              dark
+              color="indigo"
+              @click="stopRinging(index)"
+            >
+              <v-icon dark> mdi-close </v-icon>
+            </v-btn>
           </div>
           <div v-else>
             <div v-if="index === this.selectedIndex">
-              <button class="edit-button" @click="updateAlarm">update</button>
-              <button class="cancel-button" @click="cancelUpdate">
-                cancel
-              </button>
+              <v-btn class="mx-2" fab dark color="indigo" @click="updateAlarm">
+                <v-icon dark> mdi-check </v-icon>
+              </v-btn>
+              <v-btn class="mx-2" fab dark color="grey" @click="cancelUpdate">
+                <v-icon dark> mdi-cancel </v-icon>
+              </v-btn>
             </div>
             <div v-else>
-              <button class="edit-button" @click="editAlarm(index)">
+              <v-btn
+                class="mx-2"
+                fab
+                dark
+                color="warning"
+                @click="editAlarm(index)"
+              >
+                <v-icon dark> mdi-pencil </v-icon>
                 edit
-              </button>
-              <button class="remove-button" @click="removeAlarm(index)">
-                remove
-              </button>
+              </v-btn>
+              <v-btn
+                class="mx-2"
+                fab
+                dark
+                color="error"
+                @click="removeAlarm(index)"
+              >
+                <v-icon dark> mdi-delete </v-icon>
+                delete
+              </v-btn>
             </div>
           </div>
         </li>
@@ -146,69 +172,6 @@ export default {
 </template>
 
 <style>
-/* The switch - the box around the slider */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 34px;
-}
-
-/* Hide default HTML checkbox */
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-/* The slider */
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: 0.4s;
-  transition: 0.4s;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  -webkit-transition: 0.4s;
-  transition: 0.4s;
-}
-
-input:checked + .slider {
-  background-color: #7155d3;
-}
-
-input:focus + .slider {
-  box-shadow: 0 0 1px #7155d3;
-}
-
-input:checked + .slider:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
-}
-
-/* Rounded sliders */
-.slider.round {
-  border-radius: 34px;
-}
-
-.slider.round:before {
-  border-radius: 50%;
-}
-
 ul {
   list-style: none;
   padding: 0;
@@ -217,21 +180,23 @@ ul {
 }
 
 h2 {
-  color: #b2e7e8;
-  margin: 100px 0px 20px 0px;
+  color: #f2d096;
   font-size: 40px;
+  margin: 0;
+  font-family: "Poppins";
 }
-input {
+
+input[type="time"] {
   font-family: "Poppins", sans-serif;
   font-size: 20px;
   border-radius: 15px;
-  padding: 6px;
-  margin: 10px;
   display: inline-block;
   border: 1px solid #ccc;
   box-sizing: border-box;
   width: 250px;
   background-color: #ffffff;
+  padding: 6px;
+  margin: 10px;
 }
 
 input[type="time"]::-webkit-datetime-edit-fields-wrapper {
@@ -281,28 +246,9 @@ button {
   max-height: 50px;
 }
 
-.add-button {
-  background-color: #8fb9aa;
-  border: 2px solid #f9f9f9;
-}
-
-.edit-button {
-  background-color: #f2d096;
-  border: 2px solid #f9f9f9;
-}
-
-.remove-button {
-  background-color: #ed8975;
-  border: 2px solid #f9f9f9;
-}
-
-.cancel-button {
-  background-color: #ccc;
-  border: 2px solid #f9f9f9;
-}
-
 li {
   list-style-type: none;
+  padding: 10px;
 }
 
 p {
@@ -310,15 +256,21 @@ p {
   padding: auto;
 }
 
+.alarm-container {
+  background-color: rgba(0, 0, 0, 0.5);
+  margin: 30px 0px 0px 0px;
+  border-radius: 30px;
+}
+
 .alarm-card {
   position: relative;
-  align-items: center;
-  display: flex;
   background-color: rgb(241, 232, 232);
   border-radius: 25px;
-  color: rgb(115, 50, 50);
-  font-size: 70px;
+  color: #202229;
+  font-size: 50px;
   font-weight: bold;
   margin: 10px;
+  width: 550px;
+  height: 90px;
 }
 </style>
