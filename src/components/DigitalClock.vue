@@ -112,7 +112,7 @@ export default {
         position: "right",
         stopOnFocus: true,
         style: {
-          background: "linear-gradient(to right, #00b09b, #96c93d)",
+          background: "linear-gradient(to right, #241b15, #725bd3)",
           fontFamily: "Poppins",
         },
         onClick: function () {

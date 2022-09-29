@@ -73,7 +73,7 @@ export default {
         position: "center",
         stopOnFocus: true,
         style: {
-          background: "linear-gradient(to right, #00b09b, #96c93d)",
+          background: "linear-gradient(to right, #b13021, #f88c2b)",
           fontFamily: "Poppins",
         },
         onClick: function () {}, // Callback after click
@@ -86,12 +86,13 @@ export default {
 <template>
   <div class="alarm-container">
     <h2>Alarm</h2>
-    <div class="alarm-form">
-      <input class="input-alarm" type="time" v-model="tempAlarm" required />
-      <v-btn class="mx-2" fab dark color="indigo" @click="setAlarm">
+    <form class="input-alarm" @submit="setAlarm">
+      <input type="time" v-model="tempAlarm" required />
+      <v-btn type="submit" class="mx-2" fab dark color="indigo">
         <v-icon dark> mdi-plus </v-icon>
       </v-btn>
-    </div>
+    </form>
+    <div class="alarm-form"></div>
   </div>
   <li v-for="(alarm, index) in alarms" :key="index">
     <div class="alarm-card">
@@ -239,6 +240,10 @@ h2 {
   font-size: 40px;
   margin: 0;
   font-family: "Poppins";
+}
+
+.input-alarm {
+  margin: 15px;
 }
 
 input[type="time"] {
