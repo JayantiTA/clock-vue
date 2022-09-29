@@ -128,7 +128,6 @@ export default {
 
 <template>
   <div class="container">
-    <h2 class="title">Digital Clock</h2>
     <h1 class="date">{{ day }}</h1>
     <div class="time-card">
       <h1 class="time">{{ hours }} : {{ minutes }} : {{ seconds }}</h1>
@@ -152,13 +151,17 @@ h2 {
   margin: 30px;
 }
 .time {
-  color: #304d63;
+  color: #202229;
 }
 .date {
   font-family: "Dancing Script", cursive;
   color: #f2d096;
 }
 .container {
+  padding: 25px;
+  border-radius: 40px;
+  max-width: fit-content;
+  background-color: rgba(0, 0, 0, 0.5);
   margin-top: 5vh;
   display: flex;
   flex-direction: column;
