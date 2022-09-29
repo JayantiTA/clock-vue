@@ -1,6 +1,8 @@
 <script>
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
+import useAlarms from "../store/alarms";
+
 export default {
   name: "DigitalClock",
   data() {
@@ -12,7 +14,7 @@ export default {
       hours: 0,
       minutes: 0,
       seconds: 0,
-      alarms: [],
+      ...useAlarms(),
       audio: new Audio(process.env.BASE_URL + "alarm.wav"),
       lastAlarm: null,
       dayNames: [
@@ -56,9 +58,6 @@ export default {
     this.lastAlarm = localStorage.getItem("lastAlarm")
       ? JSON.parse(localStorage.getItem("lastAlarm"))
       : null;
-    this.alarms = localStorage.getItem("alarms")
-      ? JSON.parse(localStorage.getItem("alarms"))
-      : [];
   },
   methods: {
     setTime() {
@@ -119,7 +118,7 @@ export default {
         onClick: function () {
           this.audio.pause();
           this.audio.currentTime = 0;
-        }, // Callback after click
+        },
       }).showToast();
     },
   },

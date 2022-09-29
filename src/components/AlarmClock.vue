@@ -1,6 +1,8 @@
 <script>
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
+import useAlarms from "../store/alarms";
+
 export default {
   name: "AlarmClock",
   data() {
@@ -9,17 +11,10 @@ export default {
       tempUpdateAlarm: null,
       selectedIndex: -1,
       alarms: [],
+      ...useAlarms(),
     };
   },
-  mounted() {
-    setInterval(() => this.getAlarm(), 1000);
-  },
   methods: {
-    getAlarm() {
-      this.alarms = localStorage.getItem("alarms")
-        ? JSON.parse(localStorage.getItem("alarms"))
-        : [];
-    },
     setAlarm() {
       for (let alarm in this.alarms) {
         if (this.alarms[alarm].time === this.tempAlarm) {
@@ -62,6 +57,7 @@ export default {
     changeStatus(index) {
       this.alarms[index].status =
         this.alarms[index].status === "active" ? "inactive" : "active";
+      console.log(this.alarms[index].status);
       localStorage.setItem("alarms", JSON.stringify(this.alarms));
     },
     stopRinging(index) {
@@ -101,16 +97,18 @@ export default {
     <div class="alarm-card">
       <ul>
         <li>
-          <v-switch
-            v-model="status"
-            inset
-            input-value="alarm.status === 'active'"
-            @change="
-              (event) => {
-                changeStatus(index);
-              }
-            "
-          ></v-switch>
+          <label class="switch">
+            <input
+              type="checkbox"
+              :checked="alarm.status === 'active'"
+              @change="
+                (event) => {
+                  changeStatus(index, event.target.checked);
+                }
+              "
+            />
+            <span class="slider round"></span>
+          </label>
         </li>
         <li>
           <input
@@ -131,6 +129,7 @@ export default {
               @click="stopRinging(index)"
             >
               <v-icon dark> mdi-close </v-icon>
+              turn off
             </v-btn>
           </div>
           <div v-else>
@@ -172,6 +171,62 @@ export default {
 </template>
 
 <style>
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+  margin: 30px 25px;
+}
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+input:checked + .slider {
+  background-color: #7155d3;
+}
+input:focus + .slider {
+  box-shadow: 0 0 1px #7155d3;
+}
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+.slider.round:before {
+  border-radius: 50%;
+}
+
 ul {
   list-style: none;
   padding: 0;
@@ -196,7 +251,7 @@ input[type="time"] {
   width: 250px;
   background-color: #ffffff;
   padding: 6px;
-  margin: 10px;
+  margin-top: 0px;
 }
 
 input[type="time"]::-webkit-datetime-edit-fields-wrapper {
@@ -235,25 +290,12 @@ input[type="time"]::-webkit-datetime-edit-ampm-field {
   font-size: 40px;
 }
 
-button {
-  font-family: "Poppins", sans-serif;
-  border-radius: 10px;
-  padding: 6px 12px;
-  margin: 10px;
-  cursor: pointer;
-  color: #111e28;
-  font-size: 20px;
-  max-height: 50px;
-}
-
 li {
   list-style-type: none;
-  padding: 10px;
 }
 
 p {
-  margin: auto;
-  padding: auto;
+  margin: 10px 25px;
 }
 
 .alarm-container {
