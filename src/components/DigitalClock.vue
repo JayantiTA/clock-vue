@@ -54,11 +54,6 @@ export default {
       : [];
     setInterval(() => this.setTime(), 1000);
   },
-  updated() {
-    this.lastAlarm = localStorage.getItem("lastAlarm")
-      ? JSON.parse(localStorage.getItem("lastAlarm"))
-      : null;
-  },
   methods: {
     setTime() {
       const date = new Date();
@@ -157,7 +152,7 @@ h2 {
   color: #f2d096;
 }
 .container {
-  padding: 25px;
+  padding: 20px;
   border-radius: 40px;
   max-width: fit-content;
   background-color: rgba(0, 0, 0, 0.5);

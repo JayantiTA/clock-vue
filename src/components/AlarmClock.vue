@@ -19,7 +19,6 @@ export default {
       for (let alarm in this.alarms) {
         if (this.alarms[alarm].time === this.tempAlarm) {
           this.showToast();
-          console.log("Alarm already exists");
           return;
         }
       }
@@ -38,12 +37,10 @@ export default {
       for (let alarm in this.alarms) {
         if (this.alarms[alarm].time === this.tempUpdateAlarm) {
           this.showToast();
-          console.log("Alarm already exists");
           return;
         }
       }
       this.alarms[this.selectedIndex].time = this.tempUpdateAlarm;
-      console.log(this.alarms[this.selectedIndex].isRinging);
       localStorage.setItem("alarms", JSON.stringify(this.alarms));
       this.selectedIndex = -1;
     },
@@ -57,7 +54,6 @@ export default {
     changeStatus(index) {
       this.alarms[index].status =
         this.alarms[index].status === "active" ? "inactive" : "active";
-      console.log(this.alarms[index].status);
       localStorage.setItem("alarms", JSON.stringify(this.alarms));
     },
     stopRinging(index) {
@@ -85,7 +81,7 @@ export default {
 
 <template>
   <div class="alarm-container">
-    <h2>Alarm</h2>
+    <h2>alarm</h2>
     <form class="input-alarm" @submit="setAlarm">
       <input type="time" v-model="tempAlarm" required />
       <v-btn type="submit" class="mx-2" fab dark color="indigo">
@@ -123,7 +119,7 @@ export default {
         <li>
           <div v-if="alarm.isRinging === true">
             <v-btn
-              class="mx-2"
+              class="mx-9 my-7"
               fab
               dark
               color="indigo"
@@ -135,16 +131,28 @@ export default {
           </div>
           <div v-else>
             <div v-if="index === this.selectedIndex">
-              <v-btn class="mx-2" fab dark color="indigo" @click="updateAlarm">
+              <v-btn
+                class="mx-4 my-7"
+                fab
+                dark
+                color="indigo"
+                @click="updateAlarm"
+              >
                 <v-icon dark> mdi-check </v-icon>
               </v-btn>
-              <v-btn class="mx-2" fab dark color="grey" @click="cancelUpdate">
+              <v-btn
+                class="mx-2 my-7"
+                fab
+                dark
+                color="grey"
+                @click="cancelUpdate"
+              >
                 <v-icon dark> mdi-cancel </v-icon>
               </v-btn>
             </div>
             <div v-else>
               <v-btn
-                class="mx-2"
+                class="mx-4 my-7"
                 fab
                 dark
                 color="warning"
@@ -154,7 +162,7 @@ export default {
                 edit
               </v-btn>
               <v-btn
-                class="mx-2"
+                class="mx-2 my-7"
                 fab
                 dark
                 color="error"
@@ -243,7 +251,7 @@ h2 {
 }
 
 .input-alarm {
-  margin: 15px;
+  margin: 0 0 15px 15px;
 }
 
 input[type="time"] {
