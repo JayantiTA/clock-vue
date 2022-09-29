@@ -1,6 +1,8 @@
 <script>
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
+import useAlarms from "../store/alarms"
+
 export default {
   name: "AlarmClock",
   data() {
@@ -8,18 +10,10 @@ export default {
       tempAlarm: null,
       tempUpdateAlarm: null,
       selectedIndex: -1,
-      alarms: [],
+      ...useAlarms(),
     };
   },
-  mounted() {
-    setInterval(() => this.getAlarm(), 1000);
-  },
   methods: {
-    getAlarm() {
-      this.alarms = localStorage.getItem("alarms")
-        ? JSON.parse(localStorage.getItem("alarms"))
-        : [];
-    },
     setAlarm() {
       for (let alarm in this.alarms) {
         if (this.alarms[alarm].time === this.tempAlarm) {
