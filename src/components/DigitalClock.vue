@@ -1,6 +1,8 @@
 <script>
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
+import useAlarms from "../store/alarms";
+
 export default {
   name: "DigitalClock",
   data() {
@@ -12,7 +14,7 @@ export default {
       hours: 0,
       minutes: 0,
       seconds: 0,
-      alarms: [],
+      ...useAlarms(),
       audio: new Audio(process.env.BASE_URL + "alarm.wav"),
       lastAlarm: null,
       dayNames: [
@@ -52,14 +54,6 @@ export default {
       : [];
     setInterval(() => this.setTime(), 1000);
   },
-  updated() {
-    this.lastAlarm = localStorage.getItem("lastAlarm")
-      ? JSON.parse(localStorage.getItem("lastAlarm"))
-      : null;
-    this.alarms = localStorage.getItem("alarms")
-      ? JSON.parse(localStorage.getItem("alarms"))
-      : [];
-  },
   methods: {
     setTime() {
       const date = new Date();
@@ -84,12 +78,23 @@ export default {
         ) {
           if (this.lastAlarm !== this.alarms[i].time) {
             this.showToast();
+            this.alarms[i].isRinging = true;
+            localStorage.setItem("alarms", JSON.stringify(this.alarms));
             this.lastAlarm = this.alarms[i].time;
             localStorage.setItem("lastAlarm", JSON.stringify(this.lastAlarm));
+          } else {
+            if (this.alarms[i].isRinging) {
+              this.audio.play();
+              return;
+            } else {
+              this.audio.pause();
+              this.audio.currentTime = 0;
+            }
           }
-          this.audio.play();
-          return;
         } else {
+          if (this.alarms[i].isRinging) {
+            this.alarms[i].isRinging = false;
+          }
           this.audio.pause();
           this.audio.currentTime = 0;
         }
@@ -105,10 +110,14 @@ export default {
         position: "right",
         stopOnFocus: true,
         style: {
-          background: "linear-gradient(to right, #00b09b, #96c93d)",
+          background: "linear-gradient(to right, #241b15, #725bd3)",
           fontFamily: "Poppins",
+          borderRadius: "10px",
         },
-        onClick: function () {}, // Callback after click
+        onClick: function () {
+          this.audio.pause();
+          this.audio.currentTime = 0;
+        },
       }).showToast();
     },
   },
@@ -117,7 +126,6 @@ export default {
 
 <template>
   <div class="container">
-    <h2 class="title">Digital Clock</h2>
     <h1 class="date">{{ day }}</h1>
     <div class="time-card">
       <h1 class="time">{{ hours }} : {{ minutes }} : {{ seconds }}</h1>
@@ -141,13 +149,17 @@ h2 {
   margin: 30px;
 }
 .time {
-  color: #304d63;
+  color: #202229;
 }
 .date {
   font-family: "Dancing Script", cursive;
   color: #f2d096;
 }
 .container {
+  padding: 20px;
+  border-radius: 40px;
+  max-width: fit-content;
+  background-color: rgba(0, 0, 0, 0.5);
   margin-top: 5vh;
   display: flex;
   flex-direction: column;

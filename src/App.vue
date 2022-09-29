@@ -17,15 +17,20 @@ export default {
 </script>
 
 <style>
-@import url("https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Poppins:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Poppins:wght@400;500;600;700&family=Roboto:wght@900&display=swap");
 
 #app {
-  font-family: "Poppins", sans-serif;
-  background-color: #304d63;
+  /* font-family: "Poppins", sans-serif; */
+  font-family: "Roboto", sans-serif;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 body {
   height: 100vh;
-  background-color: #304d63 !important;
+  /* background-color: #304d63 !important; */
+  background: url("../public/background.jpg") no-repeat center center fixed;
 }
 </style>

@@ -1,4 +1,8 @@
 <script>
+import Toastify from "toastify-js";
+import "toastify-js/src/toastify.css";
+import useAlarms from "../store/alarms";
+
 export default {
   name: "AlarmClock",
   data() {
@@ -7,16 +11,22 @@ export default {
       tempUpdateAlarm: null,
       selectedIndex: -1,
       alarms: [],
+      ...useAlarms(),
     };
-  },
-  mounted() {
-    this.alarms = localStorage.getItem("alarms")
-      ? JSON.parse(localStorage.getItem("alarms"))
-      : [];
   },
   methods: {
     setAlarm() {
-      this.alarms.push({ time: this.tempAlarm, status: "active" });
+      for (let alarm in this.alarms) {
+        if (this.alarms[alarm].time === this.tempAlarm) {
+          this.showToast();
+          return;
+        }
+      }
+      this.alarms.push({
+        time: this.tempAlarm,
+        status: "active",
+        isRinging: false,
+      });
       localStorage.setItem("alarms", JSON.stringify(this.alarms));
     },
     editAlarm(index) {
@@ -24,6 +34,12 @@ export default {
       this.tempUpdateAlarm = this.alarms[index].time;
     },
     updateAlarm() {
+      for (let alarm in this.alarms) {
+        if (this.alarms[alarm].time === this.tempUpdateAlarm) {
+          this.showToast();
+          return;
+        }
+      }
       this.alarms[this.selectedIndex].time = this.tempUpdateAlarm;
       localStorage.setItem("alarms", JSON.stringify(this.alarms));
       this.selectedIndex = -1;
@@ -40,16 +56,41 @@ export default {
         this.alarms[index].status === "active" ? "inactive" : "active";
       localStorage.setItem("alarms", JSON.stringify(this.alarms));
     },
+    stopRinging(index) {
+      this.alarms[index].isRinging = false;
+      localStorage.setItem("alarms", JSON.stringify(this.alarms));
+    },
+    showToast() {
+      Toastify({
+        text: `Alarm is already exists`,
+        duration: 6000,
+        close: true,
+        gravity: "top",
+        position: "center",
+        stopOnFocus: true,
+        style: {
+          background: "linear-gradient(to right, #b13021, #f88c2b)",
+          fontFamily: "Poppins",
+          borderRadius: "10px",
+        },
+        onClick: function () {}, // Callback after click
+      }).showToast();
+    },
   },
 };
 </script>
 
 <template>
-  <h2>Alarm</h2>
-  <form @submit="setAlarm">
-    <input type="time" v-model="tempAlarm" required />
-    <button class="add-button" type="submit">add alarm</button>
-  </form>
+  <div class="alarm-container">
+    <h2>alarm</h2>
+    <form class="input-alarm" @submit="setAlarm">
+      <input type="time" v-model="tempAlarm" required />
+      <v-btn type="submit" class="mx-2" fab dark color="indigo">
+        <v-icon dark> mdi-plus </v-icon>
+      </v-btn>
+    </form>
+    <div class="alarm-form"></div>
+  </div>
   <li v-for="(alarm, index) in alarms" :key="index">
     <div class="alarm-card">
       <ul>
@@ -77,15 +118,61 @@ export default {
           <p v-else>{{ alarm.time }}</p>
         </li>
         <li>
-          <div v-if="index === this.selectedIndex">
-            <button class="edit-button" @click="updateAlarm">update</button>
-            <button class="cancel-button" @click="cancelUpdate">cancel</button>
+          <div v-if="alarm.isRinging === true">
+            <v-btn
+              class="mx-9 my-7"
+              fab
+              dark
+              color="indigo"
+              @click="stopRinging(index)"
+            >
+              <v-icon dark> mdi-close </v-icon>
+              turn off
+            </v-btn>
           </div>
           <div v-else>
-            <button class="edit-button" @click="editAlarm(index)">edit</button>
-            <button class="remove-button" @click="removeAlarm(index)">
-              remove
-            </button>
+            <div v-if="index === this.selectedIndex">
+              <v-btn
+                class="mx-4 my-7"
+                fab
+                dark
+                color="indigo"
+                @click="updateAlarm"
+              >
+                <v-icon dark> mdi-check </v-icon>
+              </v-btn>
+              <v-btn
+                class="mx-2 my-7"
+                fab
+                dark
+                color="grey"
+                @click="cancelUpdate"
+              >
+                <v-icon dark> mdi-cancel </v-icon>
+              </v-btn>
+            </div>
+            <div v-else>
+              <v-btn
+                class="mx-4 my-7"
+                fab
+                dark
+                color="warning"
+                @click="editAlarm(index)"
+              >
+                <v-icon dark> mdi-pencil </v-icon>
+                edit
+              </v-btn>
+              <v-btn
+                class="mx-2 my-7"
+                fab
+                dark
+                color="error"
+                @click="removeAlarm(index)"
+              >
+                <v-icon dark> mdi-delete </v-icon>
+                delete
+              </v-btn>
+            </div>
           </div>
         </li>
       </ul>
@@ -100,15 +187,14 @@ export default {
   display: inline-block;
   width: 60px;
   height: 34px;
+  margin: 30px 25px;
 }
-
 /* Hide default HTML checkbox */
 .switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
-
 /* The slider */
 .slider {
   position: absolute;
@@ -121,7 +207,6 @@ export default {
   -webkit-transition: 0.4s;
   transition: 0.4s;
 }
-
 .slider:before {
   position: absolute;
   content: "";
@@ -133,26 +218,21 @@ export default {
   -webkit-transition: 0.4s;
   transition: 0.4s;
 }
-
 input:checked + .slider {
   background-color: #7155d3;
 }
-
 input:focus + .slider {
   box-shadow: 0 0 1px #7155d3;
 }
-
 input:checked + .slider:before {
   -webkit-transform: translateX(26px);
   -ms-transform: translateX(26px);
   transform: translateX(26px);
 }
-
 /* Rounded sliders */
 .slider.round {
   border-radius: 34px;
 }
-
 .slider.round:before {
   border-radius: 50%;
 }
@@ -165,21 +245,27 @@ ul {
 }
 
 h2 {
-  color: #b2e7e8;
-  margin: 100px 0px 20px 0px;
+  color: #f2d096;
   font-size: 40px;
+  margin: 0;
+  font-family: "Poppins";
 }
-input {
+
+.input-alarm {
+  margin: 0 0 15px 15px;
+}
+
+input[type="time"] {
   font-family: "Poppins", sans-serif;
   font-size: 20px;
   border-radius: 15px;
-  padding: 6px;
-  margin: 10px;
   display: inline-block;
   border: 1px solid #ccc;
   box-sizing: border-box;
   width: 250px;
   background-color: #ffffff;
+  padding: 6px;
+  margin-top: 0px;
 }
 
 input[type="time"]::-webkit-datetime-edit-fields-wrapper {
@@ -218,55 +304,29 @@ input[type="time"]::-webkit-datetime-edit-ampm-field {
   font-size: 40px;
 }
 
-button {
-  font-family: "Poppins", sans-serif;
-  border-radius: 10px;
-  padding: 6px 12px;
-  margin: 10px;
-  cursor: pointer;
-  color: #111e28;
-  font-size: 20px;
-  max-height: 50px;
-}
-
-.add-button {
-  background-color: #8fb9aa;
-  border: 2px solid #f9f9f9;
-}
-
-.edit-button {
-  background-color: #f2d096;
-  border: 2px solid #f9f9f9;
-}
-
-.remove-button {
-  background-color: #ed8975;
-  border: 2px solid #f9f9f9;
-}
-
-.cancel-button {
-  background-color: #ccc;
-  border: 2px solid #f9f9f9;
-}
-
 li {
   list-style-type: none;
 }
 
 p {
-  margin: auto;
-  padding: auto;
+  margin: 10px 25px;
+}
+
+.alarm-container {
+  background-color: rgba(0, 0, 0, 0.5);
+  margin: 30px 0px 0px 0px;
+  border-radius: 30px;
 }
 
 .alarm-card {
   position: relative;
-  align-items: center;
-  display: flex;
   background-color: rgb(241, 232, 232);
   border-radius: 25px;
-  color: rgb(115, 50, 50);
-  font-size: 70px;
+  color: #202229;
+  font-size: 50px;
   font-weight: bold;
   margin: 10px;
+  width: 550px;
+  height: 90px;
 }
 </style>
