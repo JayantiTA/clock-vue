@@ -13,15 +13,7 @@ export default {
       ...useAlarms(),
     };
   },
-  mounted() {
-    this.getAlarm()
-  },
   methods: {
-    getAlarm() {
-      this.alarms = localStorage.getItem("alarms")
-        ? JSON.parse(localStorage.getItem("alarms"))
-        : [];
-    },
     setAlarm() {
       for (let alarm in this.alarms) {
         if (this.alarms[alarm].time === this.tempAlarm) {
