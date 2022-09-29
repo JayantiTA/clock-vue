@@ -92,6 +92,9 @@ export default {
             }
           }
         } else {
+          if (this.alarms[i].isRinging) {
+            this.alarms[i].isRinging = false;
+          }
           this.audio.pause();
           this.audio.currentTime = 0;
         }
@@ -109,6 +112,7 @@ export default {
         style: {
           background: "linear-gradient(to right, #241b15, #725bd3)",
           fontFamily: "Poppins",
+          borderRadius: "10px",
         },
         onClick: function () {
           this.audio.pause();

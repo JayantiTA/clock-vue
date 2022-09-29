@@ -71,6 +71,7 @@ export default {
         style: {
           background: "linear-gradient(to right, #b13021, #f88c2b)",
           fontFamily: "Poppins",
+          borderRadius: "10px",
         },
         onClick: function () {}, // Callback after click
       }).showToast();
