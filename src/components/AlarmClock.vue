@@ -10,7 +10,6 @@ export default {
       tempAlarm: null,
       tempUpdateAlarm: null,
       selectedIndex: -1,
-      alarms: [],
       ...useAlarms(),
     };
   },
