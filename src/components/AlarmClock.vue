@@ -11,6 +11,7 @@ export default {
       tempAlarm: null,
       tempUpdateName: null,
       tempUpdateAlarm: null,
+      tempDays: [],
       selectedIndex: -1,
       ...useAlarms(),
     };
@@ -38,6 +39,7 @@ export default {
       localStorage.setItem("alarms", JSON.stringify(this.alarms));
     },
     editAlarm(index) {
+      console.log(Object.values(this.alarms[index].days).includes("Monday"));
       this.selectedIndex = index;
       this.tempUpdateAlarm = this.alarms[index].time;
     },
@@ -68,6 +70,7 @@ export default {
       localStorage.setItem("alarms", JSON.stringify(this.alarms));
     },
     snoozeAlarm(index) {
+      this.alarms[index].isRinging = false;
       this.alarms[index].snooze += 5;
       localStorage.setItem("alarms", JSON.stringify(this.alarms));
     },
@@ -102,6 +105,15 @@ export default {
     <form class="input-alarm" @submit="setAlarm">
       <input v-model="tempName" required />
       <input type="time" v-model="tempAlarm" required />
+      <v-combobox
+        v-model="tempDays"
+        :items="dayNames"
+        label="Combobox"
+        multiple
+        outlined
+        dense
+        color="primary"
+      ></v-combobox>
       <v-btn type="submit" class="mx-2" fab dark color="indigo">
         <v-icon dark> mdi-plus </v-icon>
       </v-btn>
@@ -131,7 +143,6 @@ export default {
             <input type="time" v-model="tempUpdateAlarm" required />
           </div>
           <p v-else>
-            {{ alarm.name }}
             {{ alarm.time }}
           </p>
         </li>

@@ -15,17 +15,8 @@ export default {
       minutes: 0,
       seconds: 0,
       ...useAlarms(),
-      audio: new Audio(process.env.BASE_URL + "alarm.wav"),
       lastAlarm: null,
-      dayNames: [
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-      ],
+      audio: new Audio(process.env.BASE_URL + "alarm.wav"),
       monthNames: [
         "January",
         "February",
@@ -77,10 +68,11 @@ export default {
       let time = `${this.hours}:${this.minutes}`;
       for (let i = 0; i < this.alarms.length; ++i) {
         if (this.alarms[i].status === "active") {
-          let check =
+          let check = this.alarms[i].time === time;
+          check |=
             this.alarms[i].snooze &&
             this.timeSnoozedAlarm(this.alarms[i]) === time;
-          check |= this.alarms[i].time === time;
+          check &= Object.values(this.alarms[i].days).includes(this.day);
           check &= this.lastAlarm !== this.alarms[i].time;
           if (check) {
             this.showToast();
