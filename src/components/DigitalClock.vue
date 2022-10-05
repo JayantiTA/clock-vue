@@ -71,34 +71,56 @@ export default {
       this.months = this.monthNames[months];
       this.years = years;
       this.day = this.dayNames[day];
+      this.checkAlarm();
+    },
+    checkAlarm() {
+      let time = `${this.hours}:${this.minutes}`;
       for (let i = 0; i < this.alarms.length; ++i) {
-        if (
-          this.alarms[i].status === "active" &&
-          this.alarms[i].time === `${this.hours}:${this.minutes}`
-        ) {
-          if (this.lastAlarm !== this.alarms[i].time) {
+        if (this.alarms[i].status === "active") {
+          let check =
+            this.alarms[i].snooze &&
+            this.timeSnoozedAlarm(this.alarms[i]) === time;
+          check |= this.alarms[i].time === time;
+          check &= this.lastAlarm !== this.alarms[i].time;
+          if (check) {
             this.showToast();
             this.alarms[i].isRinging = true;
             localStorage.setItem("alarms", JSON.stringify(this.alarms));
             this.lastAlarm = this.alarms[i].time;
             localStorage.setItem("lastAlarm", JSON.stringify(this.lastAlarm));
-          } else {
-            if (this.alarms[i].isRinging) {
-              this.audio.play();
-              return;
-            } else {
-              this.audio.pause();
-              this.audio.currentTime = 0;
-            }
           }
         } else {
-          if (this.alarms[i].isRinging) {
-            this.alarms[i].isRinging = false;
-          }
-          this.audio.pause();
-          this.audio.currentTime = 0;
+          this.alarms[i].isRinging = false;
+          this.stopRinging();
+        }
+        if (this.alarms[i].isRinging) {
+          this.startRinging();
+          return;
+        } else {
+          this.stopRinging();
         }
       }
+    },
+    timeSnoozedAlarm(alarm) {
+      let hours = parseInt(alarm.time.split(":")[0]);
+      let minutes = parseInt(alarm.time.split(":")[1]) + alarm.snooze;
+      if (minutes >= 60) {
+        hours += 1;
+        minutes -= 60;
+      }
+      if (hours >= 24) {
+        hours -= 24;
+      }
+      return `${hours <= 9 ? `${hours}`.padStart(2, 0) : hours}:${
+        minutes <= 9 ? `${minutes}`.padStart(2, 0) : minutes
+      }`;
+    },
+    startRinging() {
+      this.audio.play();
+    },
+    stopRinging() {
+      this.audio.pause();
+      this.audio.currentTime = 0;
     },
     showToast() {
       Toastify({
@@ -114,10 +136,7 @@ export default {
           fontFamily: "Poppins",
           borderRadius: "10px",
         },
-        onClick: function () {
-          this.audio.pause();
-          this.audio.currentTime = 0;
-        },
+        onClick: function () {},
       }).showToast();
     },
   },

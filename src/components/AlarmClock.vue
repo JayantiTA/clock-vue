@@ -7,7 +7,9 @@ export default {
   name: "AlarmClock",
   data() {
     return {
+      tempName: null,
       tempAlarm: null,
+      tempUpdateName: null,
       tempUpdateAlarm: null,
       selectedIndex: -1,
       ...useAlarms(),
@@ -16,16 +18,23 @@ export default {
   methods: {
     setAlarm() {
       for (let alarm in this.alarms) {
-        if (this.alarms[alarm].time === this.tempAlarm) {
+        if (
+          this.alarms[alarm].time === this.tempAlarm &&
+          this.alarms[alarm].name === this.tempName
+        ) {
           this.showToast();
           return;
         }
       }
       this.alarms.push({
+        days: this.tempDays,
+        name: this.tempName,
         time: this.tempAlarm,
         status: "active",
         isRinging: false,
+        snooze: 0,
       });
+      console.log(this.alarms);
       localStorage.setItem("alarms", JSON.stringify(this.alarms));
     },
     editAlarm(index) {
@@ -34,7 +43,10 @@ export default {
     },
     updateAlarm() {
       for (let alarm in this.alarms) {
-        if (this.alarms[alarm].time === this.tempUpdateAlarm) {
+        if (
+          this.alarms[alarm].time === this.tempUpdateAlarm &&
+          this.alarms[alarm].name === this.tempName
+        ) {
           this.showToast();
           return;
         }
@@ -55,8 +67,13 @@ export default {
         this.alarms[index].status === "active" ? "inactive" : "active";
       localStorage.setItem("alarms", JSON.stringify(this.alarms));
     },
+    snoozeAlarm(index) {
+      this.alarms[index].snooze += 5;
+      localStorage.setItem("alarms", JSON.stringify(this.alarms));
+    },
     stopRinging(index) {
       this.alarms[index].isRinging = false;
+      this.alarms[index].snooze = 0;
       localStorage.setItem("alarms", JSON.stringify(this.alarms));
     },
     showToast() {
@@ -83,6 +100,7 @@ export default {
   <div class="alarm-container">
     <h2>alarm</h2>
     <form class="input-alarm" @submit="setAlarm">
+      <input v-model="tempName" required />
       <input type="time" v-model="tempAlarm" required />
       <v-btn type="submit" class="mx-2" fab dark color="indigo">
         <v-icon dark> mdi-plus </v-icon>
@@ -108,18 +126,29 @@ export default {
           </label>
         </li>
         <li>
-          <input
-            type="time"
-            v-model="tempUpdateAlarm"
-            required
-            v-if="index === this.selectedIndex"
-          />
-          <p v-else>{{ alarm.time }}</p>
+          <div v-if="index === this.selectedIndex">
+            <input v-model="tempUpdateName" required />
+            <input type="time" v-model="tempUpdateAlarm" required />
+          </div>
+          <p v-else>
+            {{ alarm.name }}
+            {{ alarm.time }}
+          </p>
         </li>
         <li>
           <div v-if="alarm.isRinging === true">
             <v-btn
-              class="mx-9 my-7"
+              class="mx-2 my-7"
+              fab
+              dark
+              color="indigo"
+              @click="snoozeAlarm(index)"
+            >
+              <v-icon dark> mdi-close </v-icon>
+              turn off
+            </v-btn>
+            <v-btn
+              class="mx-2 my-7"
               fab
               dark
               color="indigo"
