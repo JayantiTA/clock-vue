@@ -73,7 +73,8 @@ export default {
             this.alarms[i].snooze &&
             this.timeSnoozedAlarm(this.alarms[i]) === time;
           check &= Object.values(this.alarms[i].days).includes(this.day);
-          check &= this.lastAlarm !== this.alarms[i].time;
+          check &=
+            this.lastAlarm !== this.alarms[i].time && !this.alarms.snooze;
           if (check) {
             this.showToast();
             this.alarms[i].isRinging = true;
