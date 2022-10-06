@@ -11,8 +11,15 @@ export default {
       tempAlarm: null,
       tempUpdateName: null,
       tempUpdateAlarm: null,
+      tempUpdateDay: null,
       tempDays: [],
       selectedIndex: -1,
+      edited: false,
+      dialog: false,
+      ringDialog: false,
+      rules: {
+        required: (value) => !!value || "This field is required",
+      },
       ...useAlarms(),
     };
   },
@@ -37,11 +44,16 @@ export default {
       });
       console.log(this.alarms);
       localStorage.setItem("alarms", JSON.stringify(this.alarms));
+      this.dialog = false;
     },
     editAlarm(index) {
+      this.edited = true;
       console.log(Object.values(this.alarms[index].days).includes("Monday"));
       this.selectedIndex = index;
       this.tempUpdateAlarm = this.alarms[index].time;
+      this.tempUpdateName = this.alarms[index].name;
+      this.tempUpdateDay = this.alarms[index].days;
+      this.dialog = true;
     },
     updateAlarm() {
       for (let alarm in this.alarms) {
@@ -54,10 +66,15 @@ export default {
         }
       }
       this.alarms[this.selectedIndex].time = this.tempUpdateAlarm;
+      this.alarms[this.selectedIndex].name = this.tempUpdateName;
+      this.alarms[this.selectedIndex].days = this.tempUpdateDay;
       localStorage.setItem("alarms", JSON.stringify(this.alarms));
       this.selectedIndex = -1;
+      this.dialog = false;
     },
     cancelUpdate() {
+      this.dialog = false;
+      this.edited = false;
       this.selectedIndex = -1;
     },
     removeAlarm(index) {
@@ -72,12 +89,16 @@ export default {
     snoozeAlarm(index) {
       this.alarms[index].isRinging = false;
       this.alarms[index].snooze += 5;
+      console.log(this.alarms[index].snooze);
       localStorage.setItem("alarms", JSON.stringify(this.alarms));
     },
     stopRinging(index) {
       this.alarms[index].isRinging = false;
       this.alarms[index].snooze = 0;
       localStorage.setItem("alarms", JSON.stringify(this.alarms));
+    },
+    showForm() {
+      this.dialog = true;
     },
     showToast() {
       Toastify({
@@ -100,26 +121,64 @@ export default {
 </script>
 
 <template>
-  <div class="alarm-container">
-    <h2>alarm</h2>
-    <form class="input-alarm" @submit="setAlarm">
-      <input v-model="tempName" required />
-      <input type="time" v-model="tempAlarm" required />
-      <v-combobox
-        v-model="tempDays"
-        :items="dayNames"
-        label="Combobox"
-        multiple
-        outlined
-        dense
-        color="primary"
-      ></v-combobox>
-      <v-btn type="submit" class="mx-2" fab dark color="indigo">
-        <v-icon dark> mdi-plus </v-icon>
-      </v-btn>
-    </form>
-    <div class="alarm-form"></div>
-  </div>
+  <v-btn class="mx-2 my-7" fab dark color="indigo" @click="showForm()">
+    new alarm
+  </v-btn>
+  <v-dialog v-model="dialog" width="500">
+    <v-card>
+      <v-card-title primary-title> alarm </v-card-title>
+      <v-card-text class="pa-5">
+        <form @submit="setAlarm">
+          <v-text-field
+            v-model="$data[edited ? 'tempUpdateName' : 'tempName']"
+            label="Name"
+            color="primary"
+            outlined
+            required
+          ></v-text-field>
+          <input
+            type="time"
+            v-model="$data[edited ? 'tempUpdateAlarm' : 'tempAlarm']"
+            required
+          />
+          <v-combobox
+            v-model="$data[edited ? 'tempUpdateDay' : 'tempDays']"
+            :items="dayNames"
+            label="Combobox"
+            multiple
+            outlined
+            dense
+            color="primary"
+            :rules="[rules.required]"
+          ></v-combobox>
+          <v-btn @click="cancelUpdate()" class="mx-2" fab dark color="grey">
+            cancel
+          </v-btn>
+          <v-btn
+            v-if="!edited"
+            type="submit"
+            class="mx-2"
+            fab
+            dark
+            color="indigo"
+          >
+            save
+          </v-btn>
+          <v-btn
+            v-else
+            @click="updateAlarm"
+            class="mx-2"
+            fab
+            dark
+            color="warning"
+          >
+            update
+          </v-btn>
+        </form>
+      </v-card-text>
+      <v-card-actions> </v-card-actions>
+    </v-card>
+  </v-dialog>
   <li v-for="(alarm, index) in alarms" :key="index">
     <div class="alarm-card">
       <ul>
@@ -138,13 +197,8 @@ export default {
           </label>
         </li>
         <li>
-          <div v-if="index === this.selectedIndex">
-            <input v-model="tempUpdateName" required />
-            <input type="time" v-model="tempUpdateAlarm" required />
-          </div>
-          <p v-else>
-            {{ alarm.time }}
-          </p>
+          <p class="alarm-name">{{ alarm.name }}</p>
+          <p class="alarm-time">{{ alarm.time }}</p>
         </li>
         <li>
           <div v-if="alarm.isRinging === true">
@@ -152,11 +206,11 @@ export default {
               class="mx-2 my-7"
               fab
               dark
-              color="indigo"
+              color="grey"
               @click="snoozeAlarm(index)"
             >
-              <v-icon dark> mdi-close </v-icon>
-              turn off
+              <v-icon dark> mdi-snooze </v-icon>
+              snooze
             </v-btn>
             <v-btn
               class="mx-2 my-7"
@@ -170,48 +224,26 @@ export default {
             </v-btn>
           </div>
           <div v-else>
-            <div v-if="index === this.selectedIndex">
-              <v-btn
-                class="mx-4 my-7"
-                fab
-                dark
-                color="indigo"
-                @click="updateAlarm"
-              >
-                <v-icon dark> mdi-check </v-icon>
-              </v-btn>
-              <v-btn
-                class="mx-2 my-7"
-                fab
-                dark
-                color="grey"
-                @click="cancelUpdate"
-              >
-                <v-icon dark> mdi-cancel </v-icon>
-              </v-btn>
-            </div>
-            <div v-else>
-              <v-btn
-                class="mx-4 my-7"
-                fab
-                dark
-                color="warning"
-                @click="editAlarm(index)"
-              >
-                <v-icon dark> mdi-pencil </v-icon>
-                edit
-              </v-btn>
-              <v-btn
-                class="mx-2 my-7"
-                fab
-                dark
-                color="error"
-                @click="removeAlarm(index)"
-              >
-                <v-icon dark> mdi-delete </v-icon>
-                delete
-              </v-btn>
-            </div>
+            <v-btn
+              class="mx-8 my-11"
+              fab
+              dark
+              color="warning"
+              @click="editAlarm(index)"
+            >
+              <v-icon dark> mdi-pencil </v-icon>
+              edit
+            </v-btn>
+            <v-btn
+              class="mx-2 my-11"
+              fab
+              dark
+              color="error"
+              @click="removeAlarm(index)"
+            >
+              <v-icon dark> mdi-delete </v-icon>
+              delete
+            </v-btn>
           </div>
         </li>
       </ul>
@@ -220,13 +252,26 @@ export default {
 </template>
 
 <style>
+.alarm-time {
+  margin: 0;
+  font-size: 50px;
+}
+
+.alarm-name {
+  margin-top: 10px;
+  font-size: 20px;
+  background: #7155d3;
+  color: #ffffff;
+  border-radius: 15px;
+}
+
 /* The switch - the box around the slider */
 .switch {
   position: relative;
   display: inline-block;
   width: 60px;
   height: 34px;
-  margin: 30px 25px;
+  margin: 45px 25px;
 }
 /* Hide default HTML checkbox */
 .switch input {
@@ -290,8 +335,8 @@ h2 {
   font-family: "Poppins";
 }
 
-.input-alarm {
-  margin: 0 0 15px 15px;
+v-card-title {
+  font-family: "Poppins", sans-serif;
 }
 
 input[type="time"] {
@@ -304,7 +349,7 @@ input[type="time"] {
   width: 250px;
   background-color: #ffffff;
   padding: 6px;
-  margin-top: 0px;
+  margin: 0px 20px 20px 20px;
 }
 
 input[type="time"]::-webkit-datetime-edit-fields-wrapper {
@@ -347,16 +392,6 @@ li {
   list-style-type: none;
 }
 
-p {
-  margin: 10px 25px;
-}
-
-.alarm-container {
-  background-color: rgba(0, 0, 0, 0.5);
-  margin: 30px 0px 0px 0px;
-  border-radius: 30px;
-}
-
 .alarm-card {
   position: relative;
   background-color: rgb(241, 232, 232);
@@ -366,6 +401,6 @@ p {
   font-weight: bold;
   margin: 10px;
   width: 550px;
-  height: 90px;
+  height: 120px;
 }
 </style>
