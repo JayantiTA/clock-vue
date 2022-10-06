@@ -14,9 +14,10 @@ export default {
       hours: 0,
       minutes: 0,
       seconds: 0,
+      alarmName: null,
       ...useAlarms(),
       lastAlarm: null,
-      audio: new Audio(process.env.BASE_URL + "alarm.wav"),
+      audio: null,
       monthNames: [
         "January",
         "February",
@@ -76,11 +77,13 @@ export default {
           check &=
             this.lastAlarm !== this.alarms[i].time && !this.alarms.snooze;
           if (check) {
-            this.showToast();
+            this.alarmName = this.alarms[i].name;
+            this.audio = this.sounds[this.alarms[i].sound];
             this.alarms[i].isRinging = true;
             localStorage.setItem("alarms", JSON.stringify(this.alarms));
             this.lastAlarm = this.alarms[i].time;
             localStorage.setItem("lastAlarm", JSON.stringify(this.lastAlarm));
+            this.showToast();
           }
         } else {
           this.alarms[i].isRinging = false;
@@ -110,14 +113,16 @@ export default {
     },
     startRinging() {
       this.audio.play();
+      console.log(this.audio.currentTime);
     },
     stopRinging() {
-      this.audio.pause();
-      this.audio.currentTime = 0;
+      if (this.audio !== null) {
+        this.audio.pause();
+      }
     },
     showToast() {
       Toastify({
-        text: `It is ${this.hours}:${this.minutes}`,
+        text: `${this.alarmName}!!!`,
         duration: 30000,
         newWindow: false,
         close: true,

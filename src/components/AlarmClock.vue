@@ -9,17 +9,17 @@ export default {
     return {
       tempName: null,
       tempAlarm: null,
+      tempDays: [],
+      tempSound: null,
       tempUpdateName: null,
       tempUpdateAlarm: null,
       tempUpdateDay: null,
-      tempDays: [],
+      tempUpdateSound: null,
       selectedIndex: -1,
       edited: false,
       dialog: false,
       ringDialog: false,
-      rules: {
-        required: (value) => !!value || "This field is required",
-      },
+      playSound: false,
       ...useAlarms(),
     };
   },
@@ -28,19 +28,21 @@ export default {
       for (let alarm in this.alarms) {
         if (
           this.alarms[alarm].time === this.tempAlarm &&
-          this.alarms[alarm].name === this.tempName
+          this.alarms[alarm].name === this.tempName &&
+          this.alarms[alarm].days === this.tempDays
         ) {
-          this.showToast();
+          this.showToast("Alarm is already exists");
           return;
         }
       }
       this.alarms.push({
-        days: this.tempDays,
+        days: this.tempDays.sort(),
         name: this.tempName,
         time: this.tempAlarm,
         status: "active",
         isRinging: false,
         snooze: 0,
+        sound: this.tempSound,
       });
       console.log(this.alarms);
       localStorage.setItem("alarms", JSON.stringify(this.alarms));
@@ -53,21 +55,25 @@ export default {
       this.tempUpdateAlarm = this.alarms[index].time;
       this.tempUpdateName = this.alarms[index].name;
       this.tempUpdateDay = this.alarms[index].days;
+      this.tempUpdateSound = this.alarms[index].sound;
       this.dialog = true;
     },
     updateAlarm() {
       for (let alarm in this.alarms) {
         if (
           this.alarms[alarm].time === this.tempUpdateAlarm &&
-          this.alarms[alarm].name === this.tempName
+          this.alarms[alarm].name === this.tempUpdateName &&
+          this.alarms[alarm].days === this.tempUpdateDay
         ) {
-          this.showToast();
+          this.showToast("Alarm is already exists");
           return;
         }
       }
       this.alarms[this.selectedIndex].time = this.tempUpdateAlarm;
       this.alarms[this.selectedIndex].name = this.tempUpdateName;
       this.alarms[this.selectedIndex].days = this.tempUpdateDay;
+      this.alarms[this.selectedIndex].sound = this.tempUpdateSound;
+      this.alarms.snooze = 0;
       localStorage.setItem("alarms", JSON.stringify(this.alarms));
       this.selectedIndex = -1;
       this.dialog = false;
@@ -100,9 +106,21 @@ export default {
     showForm() {
       this.dialog = true;
     },
-    showToast() {
+    testSound() {
+      if (this.tempSound === null) {
+        this.showToast("Please select sound first!");
+        return;
+      }
+      this.sounds[this.tempSound].play();
+      this.playSound = true;
+    },
+    stopSound() {
+      this.sounds[this.tempSound].pause();
+      this.playSound = false;
+    },
+    showToast(message) {
       Toastify({
-        text: `Alarm is already exists`,
+        text: `${message}`,
         duration: 6000,
         close: true,
         gravity: "top",
@@ -144,14 +162,42 @@ export default {
           <v-combobox
             v-model="$data[edited ? 'tempUpdateDay' : 'tempDays']"
             :items="dayNames"
-            label="Combobox"
+            label="Day"
             multiple
             outlined
             dense
             color="primary"
-            :rules="[rules.required]"
           ></v-combobox>
-          <v-btn @click="cancelUpdate()" class="mx-2" fab dark color="grey">
+          <v-select
+            v-model="$data[edited ? 'tempUpdateSound' : 'tempSound']"
+            :items="Object.keys(sounds)"
+            :error-messages="selectErrors"
+            label="Sound"
+            required
+          ></v-select>
+          <v-btn
+            v-if="!playSound"
+            class="mx-15"
+            fab
+            dark
+            color="indigo"
+            @click="testSound()"
+          >
+            <v-icon dark> mdi-bell-ring </v-icon>
+            play
+          </v-btn>
+          <v-btn
+            v-else
+            class="mx-15"
+            fab
+            dark
+            color="blue-grey"
+            @click="stopSound()"
+          >
+            <v-icon dark> mdi-bell-ring </v-icon>
+            stop
+          </v-btn>
+          <v-btn @click="cancelUpdate()" class="mx-4" fab dark color="grey">
             cancel
           </v-btn>
           <v-btn
@@ -160,7 +206,7 @@ export default {
             class="mx-2"
             fab
             dark
-            color="indigo"
+            color="success"
           >
             save
           </v-btn>
@@ -176,7 +222,6 @@ export default {
           </v-btn>
         </form>
       </v-card-text>
-      <v-card-actions> </v-card-actions>
     </v-card>
   </v-dialog>
   <li v-for="(alarm, index) in alarms" :key="index">
@@ -196,24 +241,27 @@ export default {
             <span class="slider round"></span>
           </label>
         </li>
-        <li>
+        <li class="alarm-text">
+          <p class="alarm-day" v-for="(day, idx) in alarm.days" :key="idx">
+            {{ day }}
+          </p>
           <p class="alarm-name">{{ alarm.name }}</p>
           <p class="alarm-time">{{ alarm.time }}</p>
         </li>
         <li>
           <div v-if="alarm.isRinging === true">
             <v-btn
-              class="mx-2 my-7"
+              class="mx-4 my-11"
               fab
               dark
               color="grey"
               @click="snoozeAlarm(index)"
             >
-              <v-icon dark> mdi-snooze </v-icon>
+              <v-icon dark> mdi-bell-sleep </v-icon>
               snooze
             </v-btn>
             <v-btn
-              class="mx-2 my-7"
+              class="mx-4 my-11"
               fab
               dark
               color="indigo"
@@ -253,16 +301,25 @@ export default {
 
 <style>
 .alarm-time {
-  margin: 0;
+  margin: 0px;
   font-size: 50px;
 }
 
 .alarm-name {
-  margin-top: 10px;
-  font-size: 20px;
+  margin: 0px;
+  font-size: 18px;
   background: #7155d3;
   color: #ffffff;
-  border-radius: 15px;
+  border-radius: 5px;
+}
+
+.alarm-day {
+  padding: 0px;
+  font-size: 12px;
+  background: #a78362;
+  color: #ffffff;
+  border-radius: 5px;
+  display: inline;
 }
 
 /* The switch - the box around the slider */
@@ -397,10 +454,9 @@ li {
   background-color: rgb(241, 232, 232);
   border-radius: 25px;
   color: #202229;
-  font-size: 50px;
   font-weight: bold;
-  margin: 10px;
-  width: 550px;
+  margin: 0px 0px 30px 0px;
+  max-width: 1200px;
   height: 120px;
 }
 </style>
