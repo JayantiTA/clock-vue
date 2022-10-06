@@ -107,15 +107,23 @@ export default {
       this.dialog = true;
     },
     testSound() {
-      if (this.tempSound === null) {
+      if (this.tempSound === null && this.tempUpdateSound === null) {
         this.showToast("Please select sound first!");
         return;
       }
-      this.sounds[this.tempSound].play();
+      if (this.edited) {
+        this.sounds[this.tempUpdateSound].play();
+      } else {
+        this.sounds[this.tempSound].play();
+      }
       this.playSound = true;
     },
     stopSound() {
-      this.sounds[this.tempSound].pause();
+      if (this.edited) {
+        this.sounds[this.tempUpdateSound].pause();
+      } else {
+        this.sounds[this.tempSound].pause();
+      }
       this.playSound = false;
     },
     showToast(message) {
